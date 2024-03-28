@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace einfachNezuko.config
+namespace routenVerwaltung.config
 {
     internal class JSONReader
     {

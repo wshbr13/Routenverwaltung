@@ -1,31 +1,38 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.CommandsNext.Exceptions;
-using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
-using einfachNezuko.config;
+using routenVerwaltung.commands;
+using routenVerwaltung.config;
 using System;
 using System.Threading.Tasks;
-using einfachNezuko.Commands.Slash_Commands;
-using einfachNezuko.Commands.Prefix;
 
-namespace einfachNezuko
+namespace routenVerwaltung
 {
-    internal class Program
+    public class Program
     {
-        public static DiscordClient Client { get; set;}
-        private static CommandsNextExtension Commands { get; set;}
-        static async Task Main(string[] args)
+        static DiscordClient Client;
+        static CommandsNextExtension Commands;
+
+        public static void Main(string[] args)
         {
-            //1. Get the details of your config.json file by deserialising it
+            MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+
+        static async Task MainAsync(string[] args)
+        {
+            await InitializeBot();
+        }
+
+        static async Task InitializeBot()
+        {
+            // Erhalten Sie die Details Ihrer config.json-Datei, indem Sie sie deserialisieren
             var jsonReader = new JSONReader();
             await jsonReader.ReadJSON();
 
-            //2. Setting up the Bot Configuration
+            // Einrichten der Bot-Konfiguration
             var discordConfig = new DiscordConfiguration()
             {
                 Intents = DiscordIntents.All,
@@ -34,98 +41,95 @@ namespace einfachNezuko
                 AutoReconnect = true
             };
 
-            //3. Apply this config to our DiscordClient
+            // Wenden Sie diese Konfiguration auf unseren DiscordClient an
             Client = new DiscordClient(discordConfig);
 
-            //4. Set the default timeout for Commands that use interactivity
+            // Legen Sie die Standardzeitüberschreitung für Befehle fest, die Interaktivität verwenden
             Client.UseInteractivity(new InteractivityConfiguration()
             {
                 Timeout = TimeSpan.FromMinutes(2)
             });
 
-            //5. Set up the Task Handler Ready event
+            // Einrichten des Ereignisses "Task Handler Ready"
             Client.Ready += OnClickReady;
-            Client.ComponentInteractionCreated += ButtonPressResponse;
-            //Client.MessageCreated += MessageCreatedHandler;
 
-            //6. Set up the Commands Configuration
             var commandsConfig = new CommandsNextConfiguration()
             {
                 StringPrefixes = new string[] { jsonReader.prefix },
                 EnableMentionPrefix = true,
                 EnableDms = true,
-                EnableDefaultHelp = false,
+                EnableDefaultHelp = false
             };
 
-            //Enabling the use of commands with our config & also enabling use of Slash Commands
+            // Initialisierung der Eigenschaft CommandsNextExtension
             Commands = Client.UseCommandsNext(commandsConfig);
-            var slashCommandsConfig = Client.UseSlashCommands();
 
-            //7. Register your commands
-            // Prefix Based Commands
-            //Commands.RegisterCommands<TestCommands>();
-            Commands.RegisterCommands<BasicCommands>();
-            Commands.RegisterCommands<GameCommands>();
+            // Aktivieren des Clients zur Verwendung von Slash-Befehlen
+            //var slashCommandsConfig = Client.UseSlashCommands();
 
-            // Slash Commands
-            slashCommandsConfig.RegisterCommands<FunSL>();
+            // Registrieren Sie Ihre Befehlsklassen
+            Commands.RegisterCommands<RoutenCommands>();
+            //slashCommandsConfig.RegisterCommands<commands.slash.RoutenCommands>();
 
-            Commands.CommandErrored += CommandHandler;
-
-            //8. Connect to get the Bot online
+            // Verbinden, um den Bot online zu bekommen
             await Client.ConnectAsync();
             await Task.Delay(-1);
         }
 
-        private static async Task ButtonPressResponse(DiscordClient sender, ComponentInteractionCreateEventArgs e)
-        {
-            if (e.Interaction.Data.CustomId == "basicButton")
-            {
-                string basicCommandsList = "!poll => Erstelle eine Umfrage! \n" +
-                                           "!help => Lasse dir alle Befehle anzeigen";
+        //public static DiscordClient Client { get; set; }
+        //public static ulong CustomChannelId = 1187727222883238010;
 
-                await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent(basicCommandsList));
-            }
-            else if (e.Interaction.Data.CustomId == "gameButton")
-            {
-                string gamesList = "!cardgame => Spiele ein einfaches Kartenspiel! Wer die höchste Karte zieht, gewinnt!";
+        //private static CommandsNextExtension Commands { get; set; }
 
-                var gamesCommandList = new DiscordInteractionResponseBuilder()
-                {
-                    Title = "Liste aller Spiele- / Fun-Commands",
-                    Content = gamesList
-                };
-
-                await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, gamesCommandList);
-            }
-        }
-
-        private static async Task CommandHandler(CommandsNextExtension sender, CommandErrorEventArgs e)
-        {
-            if (e.Exception is ChecksFailedException exception)
-            {
-                string timeLeft = string.Empty;
-                foreach (var check in exception.FailedChecks)
-                {
-                    var coolDown = (CooldownAttribute)check;
-                    timeLeft = coolDown.GetRemainingCooldown(e.Context).ToString(@"hh\:mm\:ss");
-                }
-
-                var coolDownMessage = new DiscordEmbedBuilder
-                {
-                   Color = DiscordColor.Red,
-                   Title = "Bitte warte bis der Cooldown abgelaufen ist.",
-                   Description = $"Zeit: {timeLeft}"                                
-                };
-
-                await e.Context.Channel.SendMessageAsync(embed: coolDownMessage);
-            }
-        }
-
-        // Event handler which is triggered when a message is sent to the channel.
-        //private static async Task MessageCreatedHandler(DiscordClient sender, MessageCreateEventArgs e)
+        //static async Task Main(string[] args)
         //{
-        //    await e.Channel.SendMessageAsync("This event handler was triggered");
+        //    // Erhalten Sie die Details Ihrer config.json-Datei, indem Sie sie deserialisieren
+        //    var jsonReader = new JSONReader();
+        //    await jsonReader.ReadJSON();
+
+        //    // Einrichten der Bot-Konfiguration
+        //    var discordConfig = new DiscordConfiguration()
+        //    {
+        //        Intents = DiscordIntents.All,
+        //        Token = jsonReader.token,
+        //        TokenType = TokenType.Bot,
+        //        AutoReconnect = true
+        //    };
+
+        //    // Wenden Sie diese Konfiguration auf unseren DiscordClient an
+        //    Client = new DiscordClient(discordConfig);
+
+        //    // Legen Sie die Standardzeitüberschreitung für Befehle fest, die Interaktivität verwenden
+        //    Client.UseInteractivity(new InteractivityConfiguration()
+        //    {
+        //        Timeout = TimeSpan.FromMinutes(2)
+        //    });
+
+        //    // Einrichten des Ereignisses "Task Handler Ready
+        //    Client.Ready += OnClickReady;
+
+        //    var commandsConfig = new CommandsNextConfiguration()
+        //    {
+        //        StringPrefixes = new string[] { jsonReader.prefix }, 
+        //        EnableMentionPrefix = true,
+        //        EnableDms = true,
+        //        EnableDefaultHelp = false
+        //    };
+
+        //    // Initialisierung der Eigenschaft CommandsNextExtension
+        //    Commands = Client.UseCommandsNext(commandsConfig);
+
+        //    // Aktivieren des Clients zur Verwendung von Slash-Befehlen
+        //    //var slashCommandsConfig = Client.UseSlashCommands();
+
+        //    // Registrieren Sie Ihre Befehlsklassen
+        //    Commands.RegisterCommands<RoutenCommands>();
+        //    //slashCommandsConfig.RegisterCommands<commands.slash.RoutenCommands>();
+
+        //    // Verbinden, um den Bot online zu bekommen
+        //    await Client.ConnectAsync();
+        //    var program = new Program();
+        //    await Task.Delay(-1);
         //}
 
         private static Task OnClickReady(DiscordClient sender, ReadyEventArgs args)

@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("einfachNezuko")]
+[assembly: AssemblyTitle("routenVerwaltung")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Witron Logistik und Informatik GmbH")]
-[assembly: AssemblyProduct("einfachNezuko")]
-[assembly: AssemblyCopyright("Copyright © Witron Logistik und Informatik GmbH 2023")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("routenVerwaltung")]
+[assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
