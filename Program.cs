@@ -52,6 +52,7 @@ namespace routenVerwaltung
 
             // Einrichten des Ereignisses "Task Handler Ready"
             Client.Ready += OnClickReady;
+            Client.ComponentInteractionCreated += ButtonClick;
 
             var commandsConfig = new CommandsNextConfiguration()
             {
@@ -65,72 +66,36 @@ namespace routenVerwaltung
             Commands = Client.UseCommandsNext(commandsConfig);
 
             // Aktivieren des Clients zur Verwendung von Slash-Befehlen
-            //var slashCommandsConfig = Client.UseSlashCommands();
+            var slashCommandsConfig = Client.UseSlashCommands();
 
             // Registrieren Sie Ihre Befehlsklassen
             Commands.RegisterCommands<RoutenCommands>();
-            //slashCommandsConfig.RegisterCommands<commands.slash.RoutenCommands>();
+            slashCommandsConfig.RegisterCommands<commands.slash.AdminSlash>(1099734806893445271);
+            slashCommandsConfig.RegisterCommands<commands.slash.UserSlash>(1099734806893445271);
 
             // Verbinden, um den Bot online zu bekommen
             await Client.ConnectAsync();
             await Task.Delay(-1);
         }
 
-        //public static DiscordClient Client { get; set; }
-        //public static ulong CustomChannelId = 1187727222883238010;
+        private static async Task ButtonClick(DiscordClient sender, ComponentInteractionCreateEventArgs args)
+        {
+            var SelectedOption = args.Interaction.Data.Values.Length > 0 ? args. Interaction.Data.Values[0] : null;
 
-        //private static CommandsNextExtension Commands { get; set; }
+            switch (SelectedOption)
+            {
+                case "dd_Sammler":
+                    await args.Channel.SendMessageAsync("BILDLINK");
+                    break;
 
-        //static async Task Main(string[] args)
-        //{
-        //    // Erhalten Sie die Details Ihrer config.json-Datei, indem Sie sie deserialisieren
-        //    var jsonReader = new JSONReader();
-        //    await jsonReader.ReadJSON();
-
-        //    // Einrichten der Bot-Konfiguration
-        //    var discordConfig = new DiscordConfiguration()
-        //    {
-        //        Intents = DiscordIntents.All,
-        //        Token = jsonReader.token,
-        //        TokenType = TokenType.Bot,
-        //        AutoReconnect = true
-        //    };
-
-        //    // Wenden Sie diese Konfiguration auf unseren DiscordClient an
-        //    Client = new DiscordClient(discordConfig);
-
-        //    // Legen Sie die Standardzeitüberschreitung für Befehle fest, die Interaktivität verwenden
-        //    Client.UseInteractivity(new InteractivityConfiguration()
-        //    {
-        //        Timeout = TimeSpan.FromMinutes(2)
-        //    });
-
-        //    // Einrichten des Ereignisses "Task Handler Ready
-        //    Client.Ready += OnClickReady;
-
-        //    var commandsConfig = new CommandsNextConfiguration()
-        //    {
-        //        StringPrefixes = new string[] { jsonReader.prefix }, 
-        //        EnableMentionPrefix = true,
-        //        EnableDms = true,
-        //        EnableDefaultHelp = false
-        //    };
-
-        //    // Initialisierung der Eigenschaft CommandsNextExtension
-        //    Commands = Client.UseCommandsNext(commandsConfig);
-
-        //    // Aktivieren des Clients zur Verwendung von Slash-Befehlen
-        //    //var slashCommandsConfig = Client.UseSlashCommands();
-
-        //    // Registrieren Sie Ihre Befehlsklassen
-        //    Commands.RegisterCommands<RoutenCommands>();
-        //    //slashCommandsConfig.RegisterCommands<commands.slash.RoutenCommands>();
-
-        //    // Verbinden, um den Bot online zu bekommen
-        //    await Client.ConnectAsync();
-        //    var program = new Program();
-        //    await Task.Delay(-1);
-        //}
+                case "dd_Verarbeiter":
+                    await args.Channel.SendMessageAsync("BILDLINK");
+                    break;
+                default:
+                    await args.Channel.SendMessageAsync("ERROR");
+                    break;
+            }
+        }
 
         private static Task OnClickReady(DiscordClient sender, ReadyEventArgs args)
         {
